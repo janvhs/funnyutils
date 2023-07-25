@@ -54,17 +54,37 @@ func touch(path string) error {
 	// Serenity OS uses stat to check, if a file exists.
 	// touch source: https://github.com/SerenityOS/serenity/blob/8ed3cc5f7b1f84a4499cfcb4e4eae1785fae8c2e/Userland/Utilities/touch.cpp#L244
 	// LibFileSystem FileSystem::check source https://github.com/SerenityOS/serenity/blob/8ed3cc5f7b1f84a4499cfcb4e4eae1785fae8c2e/Userland/Libraries/LibFileSystem/FileSystem.cpp#L62C27-L62C27
-
-	// Rust uutils uses stat, as well.
-	// touch source: https://github.com/uutils/coreutils/blob/e77a1bf54c3e69881d539a2cf0cc70720d953331/src/uu/touch/src/touch.rs#L86
-
-	if _, err := os.Open(path); errors.Is(err, os.ErrNotExist) {
-		if _, err := os.Create(path); err != nil {
-			return err
-		}
-	} else {
+	fileExists, err := fileExists(path)
+	if err != nil {
 		return err
 	}
 
+	if !fileExists {
+		// Even though, go's os.Create differs from the GNU implementation, it
+		// is used, because it is more idiomatic and readable.
+		// The golang implementation, doesn't set the "O_NONBLOCK" and "O_NOCTTY"
+		// flags and uses a, O_TRUNC, which will not be effective, because we checked
+		// for the files existence above.
+
+		// The file get's created with the following permissions: a+rwx,u-x,g-x,o-x (before umask)
+		if _, err := os.Create(path); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+// Checks if a file exists
+func fileExists(path string) (bool, error) {
+	// Even though, golang's os.Open differs from the GNU implementation, it
+	// is used, because it is more idiomatic and readable.
+	// The golang implementation, opens the file in readonly mode, whereas
+	// the GNU implementation uses write-only.
+	_, err := os.Open(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	} else {
+		return true, err
+	}
 }
