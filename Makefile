@@ -3,5 +3,5 @@
 build:
 	rm -rf ./dist
 	mkdir ./dist
-	go build -o ./dist/ ./cmd/...
+	CGO_ENABLED=0 go build -o ./dist/ ./cmd/...
 	go run ./tools/prefix.go ./dist/
