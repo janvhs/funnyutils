@@ -4,4 +4,4 @@ build:
 	rm -rf ./dist
 	mkdir ./dist
 	go build -o ./dist/ ./cmd/...
-	# TODO: rename every binary in dist to f<NAME>
+	go run ./tools/prefix.go ./dist/
