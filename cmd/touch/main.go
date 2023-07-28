@@ -20,19 +20,16 @@ func main() {
 }
 
 func mainE() error {
-	// Flag set
-	cli := pflag.NewFlagSet(os.Args[0], pflag.ExitOnError)
+	flag := pflag.NewFlagSet(os.Args[0], pflag.ExitOnError)
 
-	// Pointers to flags
-	noCreatePtr := cli.BoolP("no-create", "c", false, "do not create any files")
+	// Define flags
+	var noCreate bool
+	flag.BoolVarP(&noCreate, "no-create", "c", false, "do not create any files")
 
 	// Parse arguments and set values to flag pointers
-	cli.Parse(os.Args[1:])
+	flag.Parse(os.Args[1:])
 
-	// Dereference pointers to flags
-	noCreate := *noCreatePtr
-
-	paths := cli.Args()
+	paths := flag.Args()
 
 	for _, path := range paths {
 		if !noCreate {
