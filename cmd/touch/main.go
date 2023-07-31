@@ -111,6 +111,7 @@ func fileExists(path string) (bool, *os.File, error) {
 	// is used, because it is more idiomatic and readable.
 	// The golang implementation, opens the file in readonly mode, whereas
 	// the GNU implementation uses write-only.
+	// FIXME: Open for writing to apply stat changes
 	f, err := os.Open(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return false, f, nil
